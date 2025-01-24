@@ -19,8 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	MonitorService_GetMetrics_FullMethodName    = "/monitor.MonitorService/GetMetrics"
-	MonitorService_GetAllMetrics_FullMethodName = "/monitor.MonitorService/GetAllMetrics"
+	MonitorService_GetMetrics_FullMethodName = "/monitor.MonitorService/GetMetrics"
 )
 
 // MonitorServiceClient is the client API for MonitorService service.
@@ -28,7 +27,6 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MonitorServiceClient interface {
 	GetMetrics(ctx context.Context, in *MetricsQuery, opts ...grpc.CallOption) (*MetricsResponse, error)
-	GetAllMetrics(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*MetricsResponse, error)
 }
 
 type monitorServiceClient struct {
@@ -49,22 +47,11 @@ func (c *monitorServiceClient) GetMetrics(ctx context.Context, in *MetricsQuery,
 	return out, nil
 }
 
-func (c *monitorServiceClient) GetAllMetrics(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*MetricsResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(MetricsResponse)
-	err := c.cc.Invoke(ctx, MonitorService_GetAllMetrics_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // MonitorServiceServer is the server API for MonitorService service.
 // All implementations must embed UnimplementedMonitorServiceServer
 // for forward compatibility.
 type MonitorServiceServer interface {
 	GetMetrics(context.Context, *MetricsQuery) (*MetricsResponse, error)
-	GetAllMetrics(context.Context, *Empty) (*MetricsResponse, error)
 	mustEmbedUnimplementedMonitorServiceServer()
 }
 
@@ -77,9 +64,6 @@ type UnimplementedMonitorServiceServer struct{}
 
 func (UnimplementedMonitorServiceServer) GetMetrics(context.Context, *MetricsQuery) (*MetricsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMetrics not implemented")
-}
-func (UnimplementedMonitorServiceServer) GetAllMetrics(context.Context, *Empty) (*MetricsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetAllMetrics not implemented")
 }
 func (UnimplementedMonitorServiceServer) mustEmbedUnimplementedMonitorServiceServer() {}
 func (UnimplementedMonitorServiceServer) testEmbeddedByValue()                        {}
@@ -120,24 +104,6 @@ func _MonitorService_GetMetrics_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
-func _MonitorService_GetAllMetrics_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Empty)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(MonitorServiceServer).GetAllMetrics(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: MonitorService_GetAllMetrics_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MonitorServiceServer).GetAllMetrics(ctx, req.(*Empty))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // MonitorService_ServiceDesc is the grpc.ServiceDesc for MonitorService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -148,10 +114,6 @@ var MonitorService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetMetrics",
 			Handler:    _MonitorService_GetMetrics_Handler,
-		},
-		{
-			MethodName: "GetAllMetrics",
-			Handler:    _MonitorService_GetAllMetrics_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

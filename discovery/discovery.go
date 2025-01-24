@@ -7,6 +7,10 @@ import (
 	"time"
 )
 
+const (
+	MonitorSvsName = "monitor"
+)
+
 type Registry interface {
 	Register(ctx context.Context, instanceID, serverName, hostPort string) error
 	Deregister(ctx context.Context, instanceID, serviceName string) error
