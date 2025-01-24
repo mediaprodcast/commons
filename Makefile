@@ -1,5 +1,5 @@
 PROTO_DIR = ../protos
-OUT_DIR = ./grpc
+OUT_DIR = ./genproto
 PROTO_FILES = $(wildcard $(PROTO_DIR)/*.proto)
 PROTO_NAMES = $(notdir $(basename $(PROTO_FILES))) # Extract proto file names without extensions
 
