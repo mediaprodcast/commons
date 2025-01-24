@@ -8,7 +8,18 @@ import (
 )
 
 const (
-	MonitorSvsName = "monitor"
+	// Service Names
+	IngressSvsName       = "ingress"
+	TranscoderSvsName    = "transcoder"
+	PackagerSvsName      = "packager"
+	StorageSvsName       = "storage"
+	OrchestrationSvsName = "orchestration"
+	MonitorSvsName       = "monitor"
+	APISvsName           = "api"
+	DashboardSvsName     = "dashboard"
+	ProbeSvsName         = "probe"
+	DRMSvsName           = "drm"
+	AutoscalerSvsName    = "autoscaler"
 )
 
 type Registry interface {
