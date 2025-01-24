@@ -1,4 +1,4 @@
-module github.com/mediaprodcast/common
+module github.com/mediaprodcast/commons
 
 go 1.22.5
 

@@ -1,4 +1,4 @@
-## Common
+## Commons
 
 This repository houses shared code, libraries, and configurations for the Media Processing Platform. This promotes code reusability, consistency, and maintainability across all platform services.
 
@@ -23,3 +23,15 @@ This repository houses shared code, libraries, and configurations for the Media 
 * Each service within the platform will import and utilize the shared code from this "common" repository.
 * This allows for consistent error handling, logging, and configuration management across all services.
 * Changes made to the "common" repository will be reflected in all dependent services upon updating their dependencies.
+
+---
+
+## Commands
+
+The `Makefile` provided in this repository facilitates protocol buffer compilation and output directory management. Below are the key commands:
+
+### Build Protocol Buffers
+To compile the protocol buffer (`.proto`) files and generate the necessary Go files for gRPC:
+
+```bash
+make all
