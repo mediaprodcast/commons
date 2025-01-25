@@ -2,7 +2,6 @@ package broker
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	_ "github.com/joho/godotenv/autoload"
@@ -15,16 +14,9 @@ import (
 const MaxRetryCount = 3
 const DLQ = "dlq_main"
 
-var (
-	amqpUser = env.GetString("RABBITMQ_USER", "guest")     // RabbitMQ username
-	amqpPass = env.GetString("RABBITMQ_PASS", "guest")     // RabbitMQ password
-	amqpHost = env.GetString("RABBITMQ_HOST", "localhost") // RabbitMQ host address
-	amqpPort = env.GetString("RABBITMQ_PORT", "5672")      // RabbitMQ port
-)
+var address = env.GetString("RABBITMQ_ADDR", "amqp://guest:guest@localhost:5672/") // RabbitMQ address
 
 func Connect() (*amqp.Channel, func() error) {
-	address := fmt.Sprintf("amqp://%s:%s@%s:%s", amqpUser, amqpPass, amqpHost, amqpPort)
-
 	conn, err := amqp.Dial(address)
 	if err != nil {
 		zap.L().Fatal("Failed to connect to RabbitMQ", zap.Error(err))
@@ -43,6 +35,16 @@ func Connect() (*amqp.Channel, func() error) {
 	err = ch.ExchangeDeclare(EventProcessingErrors, "fanout", true, false, false, false, nil)
 	if err != nil {
 		zap.L().Fatal("Failed to declare exchange", zap.String("exchange", EventProcessingErrors), zap.Error(err))
+	}
+
+	err = ch.ExchangeDeclare(TranscoderTranscodeMediaEvent, "fanout", true, false, false, false, nil)
+	if err != nil {
+		zap.L().Fatal("Failed to declare exchange", zap.String("exchange", TranscoderTranscodeMediaEvent), zap.Error(err))
+	}
+
+	err = ch.ExchangeDeclare(PackagerGeneratePlaylistEvent, "fanout", true, false, false, false, nil)
+	if err != nil {
+		zap.L().Fatal("Failed to declare exchange", zap.String("exchange", PackagerGeneratePlaylistEvent), zap.Error(err))
 	}
 
 	err = createDLQAndDLX(ch)
