@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	_ "github.com/joho/godotenv/autoload"
 	"github.com/mediaprodcast/commons/env"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"go.opentelemetry.io/otel"
@@ -14,9 +13,9 @@ import (
 const MaxRetryCount = 3
 const DLQ = "dlq_main"
 
-var address = env.GetString("RABBITMQ_ADDR", "amqp://guest:guest@localhost:5672/") // RabbitMQ address
-
 func Connect() (*amqp.Channel, func() error) {
+	var address = env.GetString("RABBITMQ_ADDR", "amqp://guest:guest@localhost:5672/") // RabbitMQ address
+
 	conn, err := amqp.Dial(address)
 	if err != nil {
 		zap.L().Fatal("Failed to connect to RabbitMQ", zap.Error(err))

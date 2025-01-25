@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	consul "github.com/hashicorp/consul/api"
-	_ "github.com/joho/godotenv/autoload"
 	"github.com/mediaprodcast/commons/env"
 	"go.uber.org/zap"
 )
@@ -17,9 +16,9 @@ type Registry struct {
 	client *consul.Client
 }
 
-var consulAddr = env.GetString("CONSUL_ADDR", "localhost:8500")
-
 func NewRegistry(serviceName string) (*Registry, error) {
+	var consulAddr = env.GetString("CONSUL_ADDR", "localhost:8500")
+
 	config := consul.DefaultConfig()
 	config.Address = consulAddr
 
