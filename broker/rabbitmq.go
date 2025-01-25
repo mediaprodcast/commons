@@ -3,42 +3,51 @@ package broker
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
 
+	_ "github.com/joho/godotenv/autoload"
+	"github.com/mediaprodcast/commons/env"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"go.opentelemetry.io/otel"
+	"go.uber.org/zap"
 )
 
 const MaxRetryCount = 3
 const DLQ = "dlq_main"
 
-func Connect(user, pass, host, port string) (*amqp.Channel, func() error) {
-	address := fmt.Sprintf("amqp://%s:%s@%s:%s", user, pass, host, port)
+var (
+	amqpUser = env.GetString("RABBITMQ_USER", "guest")     // RabbitMQ username
+	amqpPass = env.GetString("RABBITMQ_PASS", "guest")     // RabbitMQ password
+	amqpHost = env.GetString("RABBITMQ_HOST", "localhost") // RabbitMQ host address
+	amqpPort = env.GetString("RABBITMQ_PORT", "5672")      // RabbitMQ port
+)
+
+func Connect() (*amqp.Channel, func() error) {
+	address := fmt.Sprintf("amqp://%s:%s@%s:%s", amqpUser, amqpPass, amqpHost, amqpPort)
 
 	conn, err := amqp.Dial(address)
 	if err != nil {
-		log.Fatal(err)
+		zap.L().Fatal("Failed to connect to RabbitMQ", zap.Error(err))
 	}
 
 	ch, err := conn.Channel()
 	if err != nil {
-		log.Fatal(err)
+		zap.L().Fatal("Failed to open a channel", zap.Error(err))
 	}
 
 	err = ch.ExchangeDeclare(EventPublishedCount, "direct", true, false, false, false, nil)
 	if err != nil {
-		log.Fatal(err)
+		zap.L().Fatal("Failed to declare exchange", zap.String("exchange", EventPublishedCount), zap.Error(err))
 	}
 
 	err = ch.ExchangeDeclare(EventProcessingErrors, "fanout", true, false, false, false, nil)
 	if err != nil {
-		log.Fatal(err)
+		zap.L().Fatal("Failed to declare exchange", zap.String("exchange", EventProcessingErrors), zap.Error(err))
 	}
 
 	err = createDLQAndDLX(ch)
 	if err != nil {
-		log.Fatal(err)
+		zap.L().Fatal("Failed to create DLQ and DLX", zap.Error(err))
 	}
 
 	return ch, conn.Close
@@ -56,10 +65,10 @@ func HandleRetry(ch *amqp.Channel, d *amqp.Delivery) error {
 	retryCount++
 	d.Headers["x-retry-count"] = retryCount
 
-	log.Printf("Retrying message %s, retry count: %d", d.Body, retryCount)
+	zap.L().Info("Retrying message", zap.ByteString("body", d.Body), zap.Int64("retryCount", retryCount))
 
 	if retryCount >= MaxRetryCount {
-		log.Printf("Moving message to DLQ %s", DLQ)
+		zap.L().Info("Moving message to DLQ", zap.String("DLQ", DLQ))
 
 		return ch.PublishWithContext(context.Background(), "", DLQ, false, false, amqp.Publishing{
 			ContentType:  "application/json",
@@ -96,6 +105,7 @@ func createDLQAndDLX(ch *amqp.Channel) error {
 		nil,          // arguments
 	)
 	if err != nil {
+		zap.L().Fatal("Failed to declare queue", zap.String("queue", "main_queue"), zap.Error(err))
 		return err
 	}
 
@@ -111,6 +121,7 @@ func createDLQAndDLX(ch *amqp.Channel) error {
 		nil,      // arguments
 	)
 	if err != nil {
+		zap.L().Fatal("Failed to declare DLX exchange", zap.String("exchange", dlx), zap.Error(err))
 		return err
 	}
 
@@ -123,6 +134,7 @@ func createDLQAndDLX(ch *amqp.Channel) error {
 		nil,
 	)
 	if err != nil {
+		zap.L().Fatal("Failed to bind queue to DLX", zap.String("queue", q.Name), zap.String("exchange", dlx), zap.Error(err))
 		return err
 	}
 
@@ -136,6 +148,7 @@ func createDLQAndDLX(ch *amqp.Channel) error {
 		nil,   // arguments
 	)
 	if err != nil {
+		zap.L().Fatal("Failed to declare DLQ", zap.String("queue", DLQ), zap.Error(err))
 		return err
 	}
 

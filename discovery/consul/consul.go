@@ -4,20 +4,24 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 
 	consul "github.com/hashicorp/consul/api"
+	_ "github.com/joho/godotenv/autoload"
+	"github.com/mediaprodcast/commons/env"
+	"go.uber.org/zap"
 )
 
 type Registry struct {
 	client *consul.Client
 }
 
-func NewRegistry(addr, serviceName string) (*Registry, error) {
+var consulAddr = env.GetString("CONSUL_ADDR", "localhost:8500")
+
+func NewRegistry(serviceName string) (*Registry, error) {
 	config := consul.DefaultConfig()
-	config.Address = addr
+	config.Address = consulAddr
 
 	client, err := consul.NewClient(config)
 	if err != nil {
@@ -53,7 +57,8 @@ func (r *Registry) Register(ctx context.Context, instanceID, serviceName, hostPo
 }
 
 func (r *Registry) Deregister(ctx context.Context, instanceID string, serviceName string) error {
-	log.Printf("Deregistering service %s", instanceID)
+	zap.L().Info("Deregistering service", zap.String("instanceID", instanceID))
+
 	return r.client.Agent().CheckDeregister(instanceID)
 }
 

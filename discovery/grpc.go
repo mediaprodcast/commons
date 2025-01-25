@@ -2,10 +2,10 @@ package discovery
 
 import (
 	"context"
-	"log"
 	"math/rand"
 
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -16,7 +16,10 @@ func ServiceConnection(ctx context.Context, serviceName string, registry Registr
 		return nil, err
 	}
 
-	log.Printf("Discovered %d instances of %s", len(addrs), serviceName)
+	zap.L().Info("Discovered instances of service",
+		zap.Int("count", len(addrs)),
+		zap.String("service", serviceName),
+	)
 
 	// Randomly select an instance
 	return grpc.Dial(

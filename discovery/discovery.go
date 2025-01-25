@@ -37,8 +37,8 @@ func GenerateInstanceID(serviceName string) string {
 }
 
 // Register sets up the service registry, starts health checks, and returns the instance ID and registry for later use
-func Register(ctx context.Context, consulAddr, serviceName, serviceAddr string, l *zap.Logger) (string, Registry, error) {
-	registry, err := consul.NewRegistry(consulAddr, serviceName)
+func Register(ctx context.Context, serviceName, serviceAddr string) (string, Registry, error) {
+	registry, err := consul.NewRegistry(serviceName)
 	if err != nil {
 		return "", nil, err
 	}
@@ -52,7 +52,7 @@ func Register(ctx context.Context, consulAddr, serviceName, serviceAddr string, 
 	go func() {
 		for {
 			if err := registry.HealthCheck(instanceID, serviceName); err != nil {
-				l.Error("Service failed health check", zap.String("service", serviceName), zap.Error(err))
+				zap.L().Error("Service failed health check", zap.String("service", serviceName), zap.Error(err))
 			}
 			time.Sleep(time.Second * 1)
 		}
