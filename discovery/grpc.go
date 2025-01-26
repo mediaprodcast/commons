@@ -2,6 +2,7 @@ package discovery
 
 import (
 	"context"
+	"fmt"
 	"math/rand"
 
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
@@ -16,14 +17,21 @@ func ServiceConnection(ctx context.Context, serviceName string, registry Registr
 		return nil, err
 	}
 
+	if len(addrs) == 0 {
+		return nil, fmt.Errorf("failed to discovered instances of %s", serviceName)
+	}
+
+	// Randomly select an instance
+	svcAddr := addrs[rand.Intn(len(addrs))]
+
 	zap.L().Info("Discovered instances of service",
 		zap.Int("count", len(addrs)),
 		zap.String("service", serviceName),
+		zap.String("address", svcAddr),
 	)
 
-	// Randomly select an instance
-	return grpc.Dial(
-		addrs[rand.Intn(len(addrs))],
+	return grpc.NewClient(
+		svcAddr,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		// Add OpenTelemetry interceptors
 		grpc.WithUnaryInterceptor(otelgrpc.UnaryClientInterceptor()),
