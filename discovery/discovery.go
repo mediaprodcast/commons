@@ -50,11 +50,19 @@ func Register(ctx context.Context, serviceName, serviceAddr string) (string, Reg
 
 	// Start health check goroutine
 	go func() {
+		ticker := time.NewTicker(time.Second * 1)
+		defer ticker.Stop()
+
 		for {
-			if err := registry.HealthCheck(instanceID, serviceName); err != nil {
-				zap.L().Error("Service failed health check", zap.String("service", serviceName), zap.Error(err))
+			select {
+			case <-ticker.C:
+				if err := registry.HealthCheck(instanceID, serviceName); err != nil {
+					zap.L().Error("Service failed health check", zap.String("service", serviceName), zap.Error(err))
+				}
+			case <-ctx.Done():
+				zap.L().Info("Stopping health checks", zap.String("service", serviceName))
+				return
 			}
-			time.Sleep(time.Second * 1)
 		}
 	}()
 

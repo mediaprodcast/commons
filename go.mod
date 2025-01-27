@@ -3,6 +3,7 @@ module github.com/mediaprodcast/commons
 go 1.22.5
 
 require (
+	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0
 	github.com/hashicorp/consul/api v1.31.0
 	github.com/rabbitmq/amqp091-go v1.10.0
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.59.0

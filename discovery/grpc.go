@@ -33,8 +33,6 @@ func ServiceConnection(ctx context.Context, serviceName string, registry Registr
 	return grpc.NewClient(
 		svcAddr,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		// Add OpenTelemetry interceptors
-		grpc.WithUnaryInterceptor(otelgrpc.UnaryClientInterceptor()),
-		grpc.WithStreamInterceptor(otelgrpc.StreamClientInterceptor()),
+		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
 	)
 }
