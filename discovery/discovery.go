@@ -68,3 +68,26 @@ func Register(ctx context.Context, serviceName, serviceAddr string) (string, Reg
 
 	return instanceID, registry, nil
 }
+
+// Discover service address from registry
+func Discover(ctx context.Context, serviceName string, registry Registry) (string, error) {
+	addrs, err := registry.Discover(ctx, serviceName)
+	if err != nil {
+		return "", err
+	}
+
+	if len(addrs) == 0 {
+		return "", fmt.Errorf("failed to discovered instances of %s", serviceName)
+	}
+
+	// Randomly select an instance
+	svcAddr := addrs[rand.Intn(len(addrs))]
+
+	zap.L().Info("Discovered instances of service",
+		zap.Int("count", len(addrs)),
+		zap.String("service", serviceName),
+		zap.String("address", svcAddr),
+	)
+
+	return svcAddr, nil
+}
