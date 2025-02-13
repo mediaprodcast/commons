@@ -79,7 +79,7 @@ func NewGRPCServer(grpcAddr string) *grpc.Server {
 }
 
 func NewGRPCClient(svcAddr string) (*grpc.ClientConn, error) {
-	rpcLogger := zap.L().With(zap.String("service", "gRPC/server"))
+	rpcLogger := zap.L().With(zap.String("service", "gRPC/client"))
 	logTraceID := func(ctx context.Context) logging.Fields {
 		if span := trace.SpanContextFromContext(ctx); span.IsSampled() {
 			return logging.Fields{"traceID", span.TraceID().String()}
@@ -92,7 +92,7 @@ func NewGRPCClient(svcAddr string) (*grpc.ClientConn, error) {
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
 		grpc.WithChainUnaryInterceptor(
-			timeout.UnaryClientInterceptor(500*time.Millisecond),
+			timeout.UnaryClientInterceptor(30*time.Second),
 			logging.UnaryClientInterceptor(interceptorLogger(rpcLogger), logging.WithFieldsFromContext(logTraceID)),
 		),
 		grpc.WithChainStreamInterceptor(
