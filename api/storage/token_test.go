@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestEncode(t *testing.T) {
+func TestEncodeStorageConfig(t *testing.T) {
 	cfg := &pb.StorageConfig{
 		Driver: pb.StorageDriver_FS,
 		Fs: &pb.FileSystemConfig{
@@ -34,7 +34,7 @@ func TestEncode(t *testing.T) {
 	assert.Equal(t, cfg.Fs.DataPath, decoded.Fs.DataPath)
 }
 
-func TestDecodeInvalid(t *testing.T) {
+func TestDecodeStorageConfigInvalid(t *testing.T) {
 	// Test an invalid Base64 string
 	invalidBase64 := "invalid_base64_string"
 
@@ -68,7 +68,7 @@ func TestEncodeDecodeConsistency(t *testing.T) {
 	assert.Equal(t, cfg.Gcs.Bucket, decoded.Gcs.Bucket)
 }
 
-func TestDecodeEmptyString(t *testing.T) {
+func TestDecodeStorageConfigEmptyString(t *testing.T) {
 	// Test decoding an empty Base64 string
 	decoded, err := DecodeStorageConfig("")
 

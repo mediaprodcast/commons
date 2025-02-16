@@ -178,6 +178,14 @@ func (e *Executor) execute(ctx context.Context) error {
 		e.cmdLock.Unlock()
 	}()
 
+	command, err := e.PreviewCommand()
+	if err != nil {
+		e.logger.Error("Failed to preview command", zap.Error(err))
+		return err
+	}
+
+	e.logger.Debug("Executing command", zap.String("command", command))
+
 	cmd := e.commandRunner.CommandContext(ctx, e.binaryPath, e.args...)
 	e.cmd = cmd
 	e.cmdLock.Unlock()
@@ -205,7 +213,9 @@ func (e *Executor) execute(ctx context.Context) error {
 		defer wg.Done()
 		if handler != nil {
 			if err := handler(stream); err != nil {
-				e.logger.Error("stream handler error", zap.Error(err))
+				e.logger.Error("stdout/stderr handler error", zap.Error(err))
+				// Kill process
+				cmd.Process.Kill()
 			}
 		} else {
 			defaultHandler(stream)
