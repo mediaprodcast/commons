@@ -8,6 +8,7 @@ import (
 
 type Message struct {
 	Key       string
+	Queue     QueueName
 	Exchange  ExchangeName
 	Mandatory bool
 	Immediate bool
@@ -28,6 +29,11 @@ func NewMessageBuilder() *MessageBuilder {
 
 func (b *MessageBuilder) WithExchange(exchange ExchangeName) *MessageBuilder {
 	b.message.Exchange = exchange
+	return b
+}
+
+func (b *MessageBuilder) WithQueue(queue QueueName) *MessageBuilder {
+	b.message.Queue = queue
 	return b
 }
 

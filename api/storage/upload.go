@@ -53,7 +53,7 @@ func (s *StorageService) UploadBulk(ctx context.Context, files map[string]io.Rea
 	errChan := make(chan error, len(files))
 
 	// Start worker goroutines.
-	for i := 0; i < s.workers; i++ {
+	for i := 0; i < s.concurrency; i++ {
 		wg.Add(1)
 		go s.uploadWorker(ctx, &wg, fileChan, errChan)
 	}

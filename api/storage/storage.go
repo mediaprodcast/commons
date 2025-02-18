@@ -20,7 +20,7 @@ type StorageService struct {
 	retryCount    int
 	retryDelay    time.Duration
 	logger        *zap.Logger
-	workers       int // Number of workers for parallel uploads
+	concurrency   int // Number of workers for parallel uploads
 	client        *http.Client
 }
 
@@ -32,12 +32,12 @@ func NewStorageService(options ...option) *StorageService {
 				DataPath: "./tmp",
 			},
 		},
-		directory:  "",
-		endpoint:   env.GetString("STORAGE_SERVICE_ADDR", "http://localhost:9500"),
-		retryCount: 10,              // Default retry count
-		retryDelay: 1 * time.Second, // Default retry delay
-		logger:     zap.NewNop(),    // Default logger
-		workers:    5,               // Default number of workers
+		directory:   "",
+		endpoint:    env.GetString("STORAGE_SERVICE_ADDR", "http://localhost:9500"),
+		retryCount:  10,              // Default retry count
+		retryDelay:  1 * time.Second, // Default retry delay
+		logger:      zap.NewNop(),    // Default logger
+		concurrency: 1,               // Default number of concurrency
 	}
 
 	for _, fn := range options {

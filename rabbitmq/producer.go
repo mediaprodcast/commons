@@ -26,6 +26,25 @@ func (p *Producer) Publish(ctx context.Context, cfg *Message) error {
 	ctx, messageSpan := p.tracer.Start(ctx, fmt.Sprintf("AMQP - publish - %s", cfg.Exchange))
 	defer messageSpan.End()
 
+	// if queue is not defined, use exchange
+	if cfg.Queue != "" {
+		cfg.Queue = QueueName(cfg.Exchange)
+	}
+
+	// Declare the queue if it doesn't exist
+	_, err := p.conn.ch.QueueDeclare(
+		string(cfg.Queue), // queue name
+		true,              // durable
+		false,             // delete when unused
+		false,             // exclusive
+		false,             // no-wait
+		nil,               // arguments
+	)
+	if err != nil {
+		p.logger.Error("Failed to declare queue", zap.String("queue", string(cfg.Queue)), zap.Error(err))
+		return err
+	}
+
 	if cfg.Publishing.Headers != nil {
 		cfg.Publishing.Headers = InjectAMQPHeaders(ctx)
 	}

@@ -55,9 +55,9 @@ func WithLogger(logger *zap.Logger) option {
 	}
 }
 
-// WithWorkers sets the number of workers for parallel uploads.
-func WithWorkers(count int) option {
+// WithConcurrency sets the number of concurrency for parallel uploads.
+func WithConcurrency(count int) option {
 	return func(s *StorageService) {
-		s.workers = count
+		s.concurrency = count
 	}
 }

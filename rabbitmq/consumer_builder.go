@@ -15,6 +15,7 @@ type ConsumerBuilder struct {
 func NewConsumerBuilder(conn *Connection) *ConsumerBuilder {
 	return &ConsumerBuilder{
 		consumer: &Consumer{
+			concurrency:     1,
 			conn:            conn,
 			logger:          zap.NewNop(),
 			stopChan:        make(chan struct{}),

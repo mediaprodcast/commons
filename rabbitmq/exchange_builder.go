@@ -5,55 +5,55 @@ import (
 )
 
 type ExchangeBuilder struct {
-	options *Exchange
+	exchange *Exchange
 }
 
 func NewExchangeBuilder() *ExchangeBuilder {
 	return &ExchangeBuilder{
-		options: &Exchange{},
+		exchange: &Exchange{},
 	}
 }
 
 func (b *ExchangeBuilder) WithExchange(name ExchangeName) *ExchangeBuilder {
-	b.options.Name = name
+	b.exchange.Name = name
 	return b
 }
 
 func (b *ExchangeBuilder) WithKind(kind ExchangeKind) *ExchangeBuilder {
-	b.options.Kind = kind
+	b.exchange.Kind = kind
 	return b
 }
 
 func (b *ExchangeBuilder) WithDurable(durable bool) *ExchangeBuilder {
-	b.options.Durable = durable
+	b.exchange.Durable = durable
 	return b
 }
 
 func (b *ExchangeBuilder) WithAutoDelete(autoDelete bool) *ExchangeBuilder {
-	b.options.AutoDelete = autoDelete
+	b.exchange.AutoDelete = autoDelete
 	return b
 }
 
 func (b *ExchangeBuilder) WithExclusive(exclusive bool) *ExchangeBuilder {
-	b.options.Exclusive = exclusive
+	b.exchange.Exclusive = exclusive
 	return b
 }
 
 func (b *ExchangeBuilder) WithNoWait(noWait bool) *ExchangeBuilder {
-	b.options.NoWait = noWait
+	b.exchange.NoWait = noWait
 	return b
 }
 
 func (b *ExchangeBuilder) WithInternal(internal bool) *ExchangeBuilder {
-	b.options.Internal = internal
+	b.exchange.Internal = internal
 	return b
 }
 
 func (b *ExchangeBuilder) WithArgs(args amqp.Table) *ExchangeBuilder {
-	b.options.Args = args
+	b.exchange.Args = args
 	return b
 }
 
 func (b *ExchangeBuilder) Build() *Exchange {
-	return b.options
+	return b.exchange
 }

@@ -24,13 +24,7 @@ type Consumer struct {
 	logger          *zap.Logger
 	stopChan        chan struct{} // Channel for stopping the consumer
 	ready           atomic.Bool
-}
-
-type ConsumerOptions struct {
-	Logger     *zap.Logger
-	Exchange   *Exchange
-	Queue      *Queue
-	Connection *Connection
+	concurrency     int
 }
 
 // ConnectAndConsume keeps the consumer running indefinitely with auto-reconnect
@@ -115,6 +109,7 @@ func (c *Consumer) consumeOnce() error {
 
 		c.ready.Store(true) // Set ready to true after successful consumption setup
 
+		// Process messages
 		for message := range messages {
 			c.processMessage(message, q.Name)
 		}
