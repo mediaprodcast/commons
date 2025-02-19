@@ -40,6 +40,7 @@ type Metrics struct {
 	EndTime     time.Time
 	CpuTimeUsed time.Duration
 	WorkersUsed int
+	TaskCount   int
 }
 
 type Pool struct {
@@ -58,6 +59,7 @@ type Pool struct {
 	endTime        time.Time
 	cpuTimeUsed    time.Duration
 	maxWorkersUsed int
+	taskCount      int
 	metricsLock    sync.Mutex
 }
 
@@ -103,6 +105,8 @@ func (p *Pool) Submit(task Task) error {
 	p.wg.Add(1)
 	return p.pool.Submit(func() {
 		defer p.wg.Done()
+
+		p.taskCount++
 
 		taskStart := time.Now()
 
@@ -198,11 +202,12 @@ func (p *Pool) Wait() (*Metrics, []*Error) {
 	p.wg.Wait()
 
 	p.metricsLock.Lock()
-	Metrics := &Metrics{
+	metrics := &Metrics{
 		StartTime:   p.startTime,
 		EndTime:     p.endTime,
 		CpuTimeUsed: p.cpuTimeUsed,
 		WorkersUsed: p.maxWorkersUsed,
+		TaskCount:   p.taskCount,
 	}
 	p.metricsLock.Unlock()
 
@@ -213,14 +218,15 @@ func (p *Pool) Wait() (*Metrics, []*Error) {
 
 	p.logger.Debug("complete",
 		zap.Int("errors", len(errors)),
-		zap.Int("workers_used", Metrics.WorkersUsed),
-		zap.Duration("cpu_time_used", Metrics.CpuTimeUsed),
-		zap.String("start_time", Metrics.StartTime.Format(time.RFC3339)),
-		zap.String("end_time", Metrics.EndTime.Format(time.RFC3339)),
-		zap.String("elapsed_time", Metrics.EndTime.Sub(Metrics.StartTime).String()),
+		zap.Int("total_tasks", metrics.TaskCount),
+		zap.Int("workers_used", metrics.WorkersUsed),
+		zap.Duration("cpu_time_used", metrics.CpuTimeUsed),
+		zap.String("start_time", metrics.StartTime.Format(time.RFC3339)),
+		zap.String("end_time", metrics.EndTime.Format(time.RFC3339)),
+		zap.String("elapsed_time", metrics.EndTime.Sub(metrics.StartTime).String()),
 	)
 
-	return Metrics, errors
+	return metrics, errors
 }
 
 func defaultBackoff(attempt int) time.Duration {

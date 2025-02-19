@@ -1,6 +1,6 @@
 module github.com/mediaprodcast/commons
 
-go 1.23.5
+go 1.23.7
 
 require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible

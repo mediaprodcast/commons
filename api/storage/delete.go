@@ -11,7 +11,7 @@ import (
 
 // Delete deletes a single file from the storage service.
 func (s *StorageService) Delete(ctx context.Context, name string) error {
-	s.logger.Info("Starting delete", zap.String("file", name)) // Log starting delete
+	s.logger.Debug("Starting delete", zap.String("file", name)) // Log starting delete
 
 	req, err := http.NewRequestWithContext(ctx, "DELETE", s.GetAbsolutePath(name), nil)
 	if err != nil {
@@ -31,7 +31,7 @@ func (s *StorageService) Delete(ctx context.Context, name string) error {
 		return fmt.Errorf("delete failed with status: %s", resp.Status)
 	}
 
-	s.logger.Info("Delete successful", zap.String("file", name)) // Log successful delete
+	s.logger.Debug("Delete successful", zap.String("file", name)) // Log successful delete
 	return nil
 }
 
@@ -42,14 +42,14 @@ func (s *StorageService) DeleteBulk(ctx context.Context, files []string) error {
 	errChan := make(chan error, len(files))
 
 	// Start worker goroutines.
-	for i := 0; i < s.workers; i++ {
+	for i := 0; i < s.concurrency; i++ {
 		wg.Add(1)
 		go s.deleteWorker(ctx, &wg, nameChan, errChan)
 	}
 
 	// Send file names to the workers.
 	for _, name := range files {
-		s.logger.Info("Queueing file for deletion", zap.String("file", name)) // Log queuing file for deletion
+		s.logger.Debug("Queueing file for deletion", zap.String("file", name)) // Log queuing file for deletion
 		nameChan <- name
 	}
 	close(nameChan)
@@ -69,7 +69,7 @@ func (s *StorageService) DeleteBulk(ctx context.Context, files []string) error {
 		return fmt.Errorf("failed to delete %d files: %v", len(errors), errors)
 	}
 
-	s.logger.Info("All files deleted successfully") // Log all files deleted successfully
+	s.logger.Debug("All files deleted successfully") // Log all files deleted successfully
 	return nil
 }
 

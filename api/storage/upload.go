@@ -18,7 +18,7 @@ type uploadTask struct {
 
 // Upload uploads a single file to the storage service.
 func (s *StorageService) Upload(ctx context.Context, name string, reader io.Reader, contentType ...string) error {
-	s.logger.Info("Starting upload", zap.String("file", name)) // Log starting upload
+	s.logger.Debug("Starting upload", zap.String("file", name)) // Log starting upload
 
 	req, err := http.NewRequestWithContext(ctx, "PUT", s.GetAbsolutePath(name), reader)
 	if err != nil {
@@ -42,7 +42,7 @@ func (s *StorageService) Upload(ctx context.Context, name string, reader io.Read
 		return fmt.Errorf("upload failed with status: %s", resp.Status)
 	}
 
-	s.logger.Info("Upload successful", zap.String("file", name)) // Log successful upload
+	s.logger.Debug("Upload successful", zap.String("file", name)) // Log successful upload
 	return nil
 }
 
@@ -60,7 +60,7 @@ func (s *StorageService) UploadBulk(ctx context.Context, files map[string]io.Rea
 
 	// Send files to the workers.
 	for name, reader := range files {
-		s.logger.Info("Queueing file for upload", zap.String("file", name)) // Log queueing file
+		s.logger.Debug("Queueing file for upload", zap.String("file", name)) // Log queueing file
 		fileChan <- uploadTask{name: name, reader: reader}
 	}
 	close(fileChan)
@@ -80,7 +80,7 @@ func (s *StorageService) UploadBulk(ctx context.Context, files map[string]io.Rea
 		return fmt.Errorf("failed to upload %d files: %v", len(errors), errors)
 	}
 
-	s.logger.Info("All files uploaded successfully") // Log all files uploaded successfully
+	s.logger.Debug("All files uploaded successfully") // Log all files uploaded successfully
 	return nil
 }
 
